@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-// The Foundry v4: a single Sony-inspired pallet-transfer line with peripheral engineering offices.
+// The Foundry v5: a single Sony-inspired pallet-transfer line with peripheral engineering offices.
 // ALL visual production events are demonstrations; no backend approvals or trading.
 const $=s=>document.querySelector(s),canvas=$('#world'),loading=$('#loading');
 const mobile=matchMedia('(pointer:coarse)').matches,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -146,9 +146,67 @@ function conveyor(){const g=new THREE.Group();scene.add(g);box(g,101,.85,2.9,M.d
 }
 function details(){for(let x=-44;x<=44;x+=11){box(scene,.22,6,.22,M.steel,x,3,-11);box(scene,2.4,.3,.7,M.yellow,x,6,-11)}for(const x of [-50,50]){box(scene,.5,13,.5,M.steel,x,6.5,-16);box(scene,.5,13,.5,M.steel,x,6.5,16)}box(scene,101,.65,.8,M.orange,0,13,-16);for(let x=-46;x<47;x+=8)box(scene,.4,.5,1.2,M.yellow,x,13.5,-16);
  const title=label('THE FOUNDRY  /  LINE 01',22,1.7);title.position.set(-30,12,17);scene.add(title);const board=label('GEMBA  ·  AUTOMATED STRATEGY TEST & QUALITY',31,1.2);board.position.set(14,10,-15);scene.add(board)}
+
+// V5 environment art pass: city-builder context, purpose-built plant equipment, legible departments.
+const art={asphalt:mat('#35444a'),kerb:mat('#d7d1bd'),soil:mat('#665f48'),leaf:mat('#3c8464'),leaf2:mat('#79a46d'),bark:mat('#765b48'),warm:mat('#f6c778'),panel:mat('#e1e5dc'),mesh:new THREE.MeshStandardMaterial({color:'#a7c2c4',transparent:true,opacity:.3,side:THREE.DoubleSide,depthWrite:false}),darkGlass:new THREE.MeshStandardMaterial({color:'#79bbca',metalness:.25,roughness:.18,transparent:true,opacity:.43,depthWrite:false})};
+function tree(p,x,z,scale=1){const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);p.add(g);cyl(g,.18,2.3,art.bark,0,1.15,0);for(const [dx,y,dz,r] of [[0,2.9,0,1.15],[-.65,2.4,0,.85],[.5,2.5,.3,.82]]){const m=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),Math.abs(x+z)%3<1?art.leaf:art.leaf2);m.position.set(dx,y,dz);g.add(m)}return g}
+function streetlight(p,x,z){cyl(p,.13,5.8,M.steel,x,2.9,z);box(p,1.7,.15,.3,M.steel,x+.8,5.75,z);const bulb=box(p,.85,.09,.25,art.warm,x+1.45,5.63,z);bulb.material=new THREE.MeshBasicMaterial({color:'#ffcf8a'});}
+function cityDetails(){
+ // Clear road grid and painted pedestrian zones outside production machinery.
+ for(const z of [-29,28]){box(scene,112,.07,5.8,art.asphalt,0,.06,z);for(let x=-53;x<54;x+=8)box(scene,3,.08,.13,art.kerb,x,.13,z)}
+ for(const x of [-55,54]){box(scene,5.2,.08,57,art.asphalt,x,.07,0);for(let z=-25;z<26;z+=8)box(scene,.15,.09,3,art.kerb,x,.13,z)}
+ for(const x of [-48,-8,32])for(const z of [-24,24]){for(let k=0;k<5;k++)box(scene,.75,.09,3.6,art.kerb,x+k*1.35,.15,z)}
+ for(let x=-49;x<=50;x+=11){streetlight(scene,x,-24.8);streetlight(scene,x,24.8)}
+ for(let x=-49;x<=49;x+=9){tree(scene,x,-33,.7);tree(scene,x,33,.7)}
+ for(const z of [-15.6,15.6])for(let x=-45;x<=45;x+=10){box(scene,4,.28,2.2,art.soil,x,.1,z);tree(scene,x,z,.56)}
+ // Exterior fencing and clearly defined circulation.
+ for(const z of [-35,35])for(let x=-54;x<=54;x+=4){box(scene,.1,1.65,.1,M.steel,x,.9,z);box(scene,3.95,.06,.06,M.steel,x+1.95,1.55,z)}
+ for(const x of [-57,57])for(let z=-33;z<=33;z+=4){box(scene,.1,1.65,.1,M.steel,x,.9,z);box(scene,.06,.06,3.95,M.steel,x,1.55,z+1.95)}
+ // Overhead utilities routed alongside, not through, the process line.
+ for(let x=-48;x<49;x+=8){box(scene,.18,3.4,.18,M.steel,x,6.4,-9);box(scene,.18,3.4,.18,M.steel,x,6.4,9)}
+ box(scene,101,.35,.45,M.orange,0,8.15,-9);box(scene,101,.35,.45,M.blue,0,8.15,9);
+ for(let x=-47;x<49;x+=12){box(scene,2,.15,.65,art.panel,x,8.1,-9);box(scene,2,.15,.65,art.panel,x,8.1,9)}
+ // Production information board at the front of the Gemba.
+ const sign=placard(scene,'LINE 01 / PRODUCTION','6 CELLS  •  SINGLE FLOW  •  DEMO',0,10.3,13,21);sign.rotation.y=0;
+}
+function cellArt(i,x){const g=new THREE.Group();g.position.set(x,0,0);scene.add(g);
+ // Powder-coated cabinets, readable tool silhouettes and equipment-specific interfaces.
+ for(const xx of [-4.4,4.4])for(const zz of [-4.2,2.2]){box(g,.42,.26,.42,art.panel,xx,.43,zz);box(g,.14,.5,.14,M.dark,xx,.8,zz)}
+ for(let k=0;k<3;k++){box(g,1.35,1.45,.65,art.panel,2.7,1.4,-3.7+k*.95);box(g,.95,.52,.08,art.darkGlass,2.7,1.6,-3.32+k*.95);cyl(g,.07,.1,M.green,3.18,1.03,-3.3+k*.95)}
+ // Cable looms, warning floor hatching and realistic line-side material totes.
+ for(let k=0;k<5;k++){box(g,.2,.06,1.7,k%2?M.yellow:M.dark,-4.1+k*.36,.16,1.7)}
+ for(let k=0;k<2;k++){box(g,1.15,.75,.9,k===0?M.blue:M.orange,3.1+k*1.35,.55,-5.6);box(g,1.25,.1,1,M.dark,3.1+k*1.35,1,-5.6)}
+ if(i===0){ // Optical tunnel with readable entry aperture and feed reels.
+  for(let q of [-1,1]){const reel=cyl(g,.68,.25,art.panel,q*2.1,4.15,-2.8);reel.rotation.z=Math.PI/2;cyl(g,.18,.29,M.dark,q*2.1,4.15,-2.8)}
+  box(g,3.1,.22,2.2,art.darkGlass,0,3.8,-1.8);
+ }else if(i===1){ // Test head with four independent guide rods and pin array.
+  for(let q of [-1.4,-.5,.5,1.4])for(let z of [-2.6,-1.7])cyl(g,.055,.45,M.yellow,q,2.7,z);
+  box(g,3.8,.4,2.5,art.panel,0,3.15,-2.1);
+ }else if(i===2){ // Vision illumination and dedicated optics.
+  for(let q of [-1.4,0,1.4]){cyl(g,.38,.17,art.warm,q,4.25,-1.5);cyl(g,.2,.22,art.darkGlass,q,4.05,-1.5)}
+ }else if(i===3){ // Three physically distinct grading bins with open tops.
+  for(let q of [-2.2,0,2.2]){box(g,1.6,.1,1.8,M.dark,q,3.4,-3.4);box(g,.1,.55,1.8,art.panel,q-.8,3.65,-3.4);box(g,.1,.55,1.8,art.panel,q+.8,3.65,-3.4)}
+ }else if(i===4){ // Safety scanner, isolation cabinet and light curtain.
+  for(let q of [-2.3,2.3]){box(g,.14,3.2,.18,M.yellow,q,3.4,1.55);for(let y=2.1;y<4.8;y+=.5)box(g,.18,.08,.22,M.red,q,y,1.7)}
+ }else{ // Label head and shipping pallet stack.
+  for(let k=0;k<3;k++)box(g,1.4,.25,1.15,art.soil,2.7,1.8+k*.3,-4.3);
+  box(g,1.5,.12,1.1,art.panel,0,4.4,-2.6);
+ }
+}
+function officeArt(i,x,z,w,d){const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);const h=i===9?11:7.2;
+ // Curtain-wall glazing with real mullions and a deep roof fascia.
+ box(g,w+.55,.48,d+.55,M.dark,0,h+.5,0);
+ for(let xx=-w/2+1;xx<w/2;xx+=2.3){box(g,.11,h-1.25,.12,M.dark,xx,(h-1.25)/2+.4,d/2+.24);box(g,.11,h-1.25,.12,M.dark,xx,(h-1.25)/2+.4,-d/2-.24)}
+ for(let yy of [2.6,5.3]){box(g,w-.6,.1,.13,M.dark,0,yy,d/2+.26);box(g,w-.6,.1,.13,M.dark,0,yy,-d/2-.26)}
+ for(let xx=-w/2+2;xx<w/2-1;xx+=3.2){box(g,2.1,.12,1.3,art.panel,xx,1.6,.3);box(g,.85,.65,.1,M.blue,xx,2.1,.85);box(g,.75,.12,.75,M.dark,xx,1.3,1.45)}
+ for(let xx=-w/2+2;xx<w/2-1;xx+=4){box(g,.8,.08,.7,art.warm,xx,h-.5,0)}
+ for(let xx=-w/2+2;xx<w/2-1;xx+=4){box(g,.85,1.2,.85,art.soil,xx,.65,d/2+1.1);tree(g,xx,d/2+1.1,.45)}
+ for(let xx=-w/2+2;xx<w/2-1;xx+=3.7)box(g,1.4,.3,1.6,M.steel,xx,h+.85,-1.2);
+}
+
 function resize(){const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight),aspect=w/h;camera.left=-42*aspect;camera.right=42*aspect;camera.top=42;camera.bottom=-42;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}
 function focus(pos,target,zoom){focusTween={a:camera.position.clone(),b:pos,c:controls.target.clone(),d:target,z0:camera.zoom,z1:zoom,t:0}}
 function overview(){selected=-1;$('#inspector').classList.add('hidden');$('#selected-name').textContent='OVERVIEW';focus(new THREE.Vector3(68,73,88),new THREE.Vector3(0,1,0),mobile?1.05:1.45)}
 function select(i){selected=i;const a=data[i];$('#inspector').classList.remove('hidden');$('#agent-title').textContent=a[0]+' · '+a[1];$('#agent-role').textContent=a[2];$('#agent-state').textContent=a[3];$('#agent-decision').textContent=a[4];$('#agent-metric').textContent=a[5];$('#selected-name').textContent=a[0];const x=i<6?-40+i*16.1:i===9?33:i===10?-25:i===11?25:-31+(i-6)*22;const z=i<6?0:i===9?-19:i>=10?19:-19;focus(new THREE.Vector3(x+22,28,z+28),new THREE.Vector3(x,2,z),2.25)}
-function init(){scene.add(new THREE.HemisphereLight(0xffffff,0x6b7f68,2.3));const sun=new THREE.DirectionalLight(0xfff1cc,2.5);sun.position.set(-40,75,50);sun.castShadow=!mobile;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-90;sun.shadow.camera.right=90;sun.shadow.camera.top=70;sun.shadow.camera.bottom=-70;scene.add(sun);ground();for(let i=0;i<6;i++)machine(i,-40+i*16.1);conveyor();office(6,-32,-19,18);office(7,-10,-19,18);office(8,12,-19,18);office(9,35,-19,15);office(10,-25,19,17);office(11,24,19,19);details();resize();addEventListener('resize',resize);overview();controls.update();let down=null;const ray=new THREE.Raycaster(),v=new THREE.Vector2();canvas.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});canvas.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>9)return;const r=canvas.getBoundingClientRect();v.set((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2);ray.setFromCamera(v,camera);const hits=ray.intersectObjects(clickable,false);if(hits.length)select(hits[0].object.userData.agent)});canvas.addEventListener('pointercancel',()=>down=null);$('#play').onclick=()=>{playing=true;lastCycle=clock.getElapsedTime();$('#status').textContent='DEMO LINE RUNNING · NO LIVE TRADES'};$('#stop').onclick=()=>{playing=false;$('#status').textContent='LINE STOPPED · DEMO ONLY'};$('#reset').onclick=overview;$('#overview').onclick=overview;$('#close').onclick=()=>$('#inspector').classList.add('hidden');loading.style.display='none';function frame(){requestAnimationFrame(frame);const t=clock.getElapsedTime();if(focusTween){const f=focusTween;f.t=Math.min(1,f.t+.035);const k=1-(1-f.t)**3;camera.position.lerpVectors(f.a,f.b,k);controls.target.lerpVectors(f.c,f.d,k);camera.zoom=f.z0+(f.z1-f.z0)*k;camera.updateProjectionMatrix();if(f.t===1)focusTween=null}if(!reduce){for(const fn of animated)fn(t);pallets.forEach((p,i)=>{p.position.x=-48+((i*14+(playing?t*3.1:0))%96)})}controls.update();controls.target.x=THREE.MathUtils.clamp(controls.target.x,-50,50);controls.target.z=THREE.MathUtils.clamp(controls.target.z,-29,29);if(playing&&t-lastCycle>2.5){lastCycle=t;eventCount++;$('#events').textContent=eventCount;$('#status').textContent='DEMO CYCLE '+eventCount+' · STATION '+data[(eventCount-1)%6][0]+' · NO REAL APPROVALS'}renderer.render(scene,camera)}frame()}
+function init(){scene.add(new THREE.HemisphereLight(0xffffff,0x6b7f68,2.3));const sun=new THREE.DirectionalLight(0xfff1cc,2.5);sun.position.set(-40,75,50);sun.castShadow=!mobile;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-90;sun.shadow.camera.right=90;sun.shadow.camera.top=70;sun.shadow.camera.bottom=-70;scene.add(sun);ground();for(let i=0;i<6;i++){machine(i,-40+i*16.1);cellArt(i,-40+i*16.1)}conveyor();office(6,-32,-19,18);officeArt(6,-32,-19,18,10);office(7,-10,-19,18);officeArt(7,-10,-19,18,10);office(8,12,-19,18);officeArt(8,12,-19,18,10);office(9,35,-19,15);officeArt(9,35,-19,15,10);office(10,-25,19,17);officeArt(10,-25,19,17,10);office(11,24,19,19);officeArt(11,24,19,19,10);details();cityDetails();resize();addEventListener('resize',resize);overview();controls.update();let down=null;const ray=new THREE.Raycaster(),v=new THREE.Vector2();canvas.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});canvas.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>9)return;const r=canvas.getBoundingClientRect();v.set((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2);ray.setFromCamera(v,camera);const hits=ray.intersectObjects(clickable,false);if(hits.length)select(hits[0].object.userData.agent)});canvas.addEventListener('pointercancel',()=>down=null);$('#play').onclick=()=>{playing=true;lastCycle=clock.getElapsedTime();$('#status').textContent='DEMO LINE RUNNING · NO LIVE TRADES'};$('#stop').onclick=()=>{playing=false;$('#status').textContent='LINE STOPPED · DEMO ONLY'};$('#reset').onclick=overview;$('#overview').onclick=overview;$('#close').onclick=()=>$('#inspector').classList.add('hidden');loading.style.display='none';function frame(){requestAnimationFrame(frame);const t=clock.getElapsedTime();if(focusTween){const f=focusTween;f.t=Math.min(1,f.t+.035);const k=1-(1-f.t)**3;camera.position.lerpVectors(f.a,f.b,k);controls.target.lerpVectors(f.c,f.d,k);camera.zoom=f.z0+(f.z1-f.z0)*k;camera.updateProjectionMatrix();if(f.t===1)focusTween=null}if(!reduce){for(const fn of animated)fn(t);pallets.forEach((p,i)=>{p.position.x=-48+((i*14+(playing?t*3.1:0))%96)})}controls.update();controls.target.x=THREE.MathUtils.clamp(controls.target.x,-50,50);controls.target.z=THREE.MathUtils.clamp(controls.target.z,-29,29);if(playing&&t-lastCycle>2.5){lastCycle=t;eventCount++;$('#events').textContent=eventCount;$('#status').textContent='DEMO CYCLE '+eventCount+' · STATION '+data[(eventCount-1)%6][0]+' · NO REAL APPROVALS'}renderer.render(scene,camera)}frame()}
 try{init()}catch(e){console.error(e);loading.style.display='grid';loading.style.color='#ff655a';loading.textContent='STARTUP ERROR: '+(e?.message||'WebGL unavailable')}
