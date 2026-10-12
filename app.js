@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-// The Foundry v5: a single Sony-inspired pallet-transfer line with peripheral engineering offices.
+// The Foundry v6: a single Sony-inspired pallet-transfer line with peripheral engineering offices.
 // ALL visual production events are demonstrations; no backend approvals or trading.
 const $=s=>document.querySelector(s),canvas=$('#world'),loading=$('#loading');
 const mobile=matchMedia('(pointer:coarse)').matches,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -204,9 +204,76 @@ function officeArt(i,x,z,w,d){const g=new THREE.Group();g.position.set(x,0,z);sc
  for(let xx=-w/2+2;xx<w/2-1;xx+=3.7)box(g,1.4,.3,1.6,M.steel,xx,h+.85,-1.2);
 }
 
+
+// V6: purpose-led assembly dressing; geometry is deliberately lightweight for iPhone.
+const fine={rubber:mat('#171e23'),chrome:mat('#d4e2df',.8,.22),copper:mat('#bd783f',.65,.34),warning:mat('#ffce51'),led:new THREE.MeshBasicMaterial({color:'#61e9fa'}),screen:new THREE.MeshBasicMaterial({color:'#164b6e'}),white:mat('#f0ede3'),frame:mat('#354a54',.7,.45)};
+function rod(p,a,b,r=.07,m=fine.chrome){const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),v=B.clone().sub(A);const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,v.length(),8),m);o.position.copy(A.add(B).multiplyScalar(.5));o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());p.add(o);return o}
+function tube(p,x,y,z,span,axis='x',r=.08,m=fine.copper){const o=cyl(p,r,span,m,x,y,z);if(axis==='x')o.rotation.z=Math.PI/2;if(axis==='z')o.rotation.x=Math.PI/2;return o}
+function terminal(p,x,y,z){box(p,1.3,1.9,.72,fine.white,x,y,z);box(p,1.02,.74,.08,fine.screen,x,y+.35,z+.41);for(let k=0;k<4;k++)box(p,.12,.08,.09,k===0?M.green:M.blue,x-.34+k*.22,y-.37,z+.42);cyl(p,.15,.14,M.red,x+.41,y-.65,z+.45)}
+function tote(p,x,z,c=M.blue){box(p,1.45,.2,1.05,fine.rubber,x,.33,z);for(const dz of [-.44,.44])box(p,1.45,.62,.12,c,x,.69,z+dz);for(const dx of [-.67,.67])box(p,.12,.62,.9,c,x+dx,.69,z);for(let k=0;k<3;k++)box(p,.25,.14,.62,fine.white,x-.43+k*.43,.49,z)}
+function detailCell(i,x){const g=new THREE.Group();g.position.set(x,0,0);scene.add(g);
+ // Distinct machine frame with visible fasteners and upper electrical cable tray.
+ for(const dx of [-4.7,4.7])for(const dz of [-4.45,4.45]){cyl(g,.19,.12,fine.chrome,dx,.68,dz);cyl(g,.08,.09,fine.rubber,dx,.78,dz)}
+ box(g,9.5,.22,.42,fine.frame,0,6.45,-4.45);for(let k=0;k<8;k++)box(g,.12,.18,.65,fine.chrome,-4.1+k*1.15,6.55,-4.45);
+ terminal(g,4.12,2.5,3.35);
+ // Maintenance walkway / anti-slip steps / work area delineation.
+ for(let k=0;k<7;k++)box(g,.06,.035,.85,k%2?M.yellow:fine.rubber,-3.9+k*.19,.16,3.6);
+ for(let k=0;k<3;k++)tote(g,-3.6+k*1.65,-5.2,k===1?M.orange:M.blue);
+ // Robot has a visible work zone and an end-effector at its machine.
+ box(g,2.6,.04,2.4,M.yellow,3.25,.13,3.55);box(g,2.25,.05,2.05,M.floor,3.25,.17,3.55);
+ if(i===0){ // Intake: guarded scanning arch, rollers, barcode beam, removable filter trays.
+  for(let xx of [-2.1,2.1])box(g,.27,3.1,.27,fine.white,xx,3.1,-1.7);
+  box(g,4.6,.45,.55,fine.white,0,4.7,-1.7);
+  box(g,3.7,.09,.25,fine.led,0,4.36,-1.45);
+  for(let k=0;k<7;k++){const r=cyl(g,.16,3.6,fine.chrome,-1.6+k*.53,1.55,-2.05);r.rotation.x=Math.PI/2}
+  for(let k=0;k<3;k++)box(g,1.1,.23,1.6,k===0?M.green:fine.white,-2.5+k*1.3,2.4,-3.65);
+ }else if(i===1){ // ATE: pneumatic press, platen, probe bed, control cabinet and test-status tower.
+  for(const xx of [-2.25,2.25]){cyl(g,.16,3.3,fine.chrome,xx,3.2,-1.85);cyl(g,.26,.24,fine.rubber,xx,4.65,-1.85)}
+  box(g,5.2,.42,3.1,fine.white,0,4.9,-1.85);cyl(g,.55,1.3,fine.chrome,0,5.55,-1.85);
+  box(g,4.6,.38,2.65,M.blue,0,3.2,-1.85);
+  for(let xx=-1.8;xx<=1.8;xx+=.6)for(let zz=-2.7;zz<=-1;zz+=.55)cyl(g,.065,.35,fine.copper,xx,2.84,zz);
+  box(g,2.3,1.9,.55,fine.white,-3.55,2.1,-3.8);box(g,1.7,1.1,.09,fine.screen,-3.55,2.38,-3.47);
+ }else if(i===2){ // Vision: three camera lenses, ring illumination, overhead inspection gantry.
+  box(g,6.2,.24,.55,fine.frame,0,5.2,-1.65);
+  for(const xx of [-2,0,2]){box(g,.95,.85,.8,fine.white,xx,4.55,-1.6);cyl(g,.36,.65,fine.rubber,xx,3.8,-1.6);cyl(g,.24,.12,fine.led,xx,3.44,-1.6)}
+  for(let k=0;k<6;k++)box(g,.12,.12,.18,fine.led,-2.5+k,2.65,-2.7);
+  box(g,1.7,.2,1.8,M.red,-3.2,1.7,-2.5);
+ }else if(i===3){ // Sorting: gantry rail, vertical pick slide, gripper, three clearly different bins.
+  box(g,6.4,.35,.5,fine.chrome,0,5.45,-2.6);box(g,1.2,.7,.8,M.orange,.8,5.05,-2.6);
+  tube(g,.8,4.25,-2.6,1.4,'y',.18);for(const xx of [.45,1.15])rod(g,[xx,3.45,-2.6],[xx,3.0,-2.6],.07);
+  for(const [j,mm] of [M.green,M.yellow,M.red].entries()){const xx=-2.3+j*2.3;box(g,1.7,.2,1.9,mm,xx,1.9,-4);for(const z of [-4.85,-3.15])box(g,1.7,.8,.12,mm,xx,2.35,z)}
+ }else if(i===4){ // Risk interlock: guarded cage, beacon, physical barrier, dual safety panels.
+  for(const xx of [-2.75,2.75])for(const zz of [-3.2,1.6])box(g,.12,3.5,.12,M.yellow,xx,3,zz);
+  for(const zz of [-3.2,1.6])box(g,5.6,.12,.12,M.yellow,0,4.8,zz);
+  for(const xx of [-2.75,2.75])box(g,.12,.12,4.8,M.yellow,xx,4.8,-.8);
+  box(g,5.3,.12,.13,M.red,0,2.15,1.6);box(g,1.2,1.7,.5,fine.white,-3.5,2.4,-3.6);
+  for(let k=0;k<3;k++)box(g,.24,.25,.08,[M.red,M.yellow,M.green][k],-3.8+k*.3,2.7,-3.3);
+  for(let k=0;k<5;k++)box(g,.08,2.8,.07,fine.led,-2.1+k*1.05,3.1,1.55);
+ }else{ // Dispatch: label applicator, carton magazine, roller outfeed and scan head.
+  box(g,2.8,2.2,2.1,fine.white,0,3.45,-2.4);box(g,1.9,.4,.12,fine.screen,0,4.1,-1.28);
+  box(g,2.2,.15,1.45,M.orange,0,2.55,-2.3);tube(g,0,4.6,-2.4,2.1,'x',.25);
+  for(let k=0;k<4;k++){box(g,1.35,.75,1.1,art.soil,2.7,1.2+k*.75,-4.5);box(g,1.1,.18,.09,fine.white,2.7,1.4+k*.75,-3.94)}
+  for(let k=0;k<5;k++){const r=cyl(g,.15,2.6,fine.chrome,-1.7+k*.8,1.65,2);r.rotation.x=Math.PI/2}
+ }
+}
+function detailCampus(){
+ // Distinctive site signage and utility features make the campus readable at isometric zoom.
+ for(const [x,z,w,t] of [[-32,-19,18,'RESEARCH'],[-10,-19,18,'STRATEGY DESIGN'],[12,-19,18,'OPTIMISATION'],[35,-19,15,'CONTROL'],[-25,19,17,'JOURNAL'],[24,19,19,'VAULT']]){
+  const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+  const h=t==='CONTROL'?11:7.2;
+  const a=label(t,w-.9,.74);a.position.set(0,h-.35,5.42);g.add(a);
+  // Solar panels, air handling plant and roof access grilles.
+  for(let k=-1;k<=1;k++){box(g,2.5,.12,1.55,fine.screen,k*3,h+.85,-2.5);for(let m=0;m<3;m++)box(g,.035,.13,1.55,fine.chrome,k*3-.8+m*.8,h+.92,-2.5)}
+  for(let k=-1;k<=1;k++){box(g,1.4,.75,1.2,fine.white,k*3,h+1,-.1);cyl(g,.44,.12,fine.rubber,k*3,h+1.43,-.1)}
+ }
+ // Wayfinding and functional segregation of pedestrians, pallets and reject work.
+ for(const [x,z,t] of [[-43,10,'INFEED'],[1,10,'GEMBA'],[39,10,'OUTFEED'],[-12,15,'REWORK']])floorMark(scene,t,x,z,6.2);
+ for(let x=-47;x<=47;x+=3.6){box(scene,1.25,.025,.14,M.yellow,x,.16,7.7);box(scene,1.25,.025,.14,M.yellow,x,.16,-7.7)}
+}
+
 function resize(){const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight),aspect=w/h;camera.left=-42*aspect;camera.right=42*aspect;camera.top=42;camera.bottom=-42;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}
 function focus(pos,target,zoom){focusTween={a:camera.position.clone(),b:pos,c:controls.target.clone(),d:target,z0:camera.zoom,z1:zoom,t:0}}
 function overview(){selected=-1;$('#inspector').classList.add('hidden');$('#selected-name').textContent='OVERVIEW';focus(new THREE.Vector3(68,73,88),new THREE.Vector3(0,1,0),mobile?1.05:1.45)}
 function select(i){selected=i;const a=data[i];$('#inspector').classList.remove('hidden');$('#agent-title').textContent=a[0]+' · '+a[1];$('#agent-role').textContent=a[2];$('#agent-state').textContent=a[3];$('#agent-decision').textContent=a[4];$('#agent-metric').textContent=a[5];$('#selected-name').textContent=a[0];const x=i<6?-40+i*16.1:i===9?33:i===10?-25:i===11?25:-31+(i-6)*22;const z=i<6?0:i===9?-19:i>=10?19:-19;focus(new THREE.Vector3(x+22,28,z+28),new THREE.Vector3(x,2,z),2.25)}
-function init(){scene.add(new THREE.HemisphereLight(0xffffff,0x6b7f68,2.3));const sun=new THREE.DirectionalLight(0xfff1cc,2.5);sun.position.set(-40,75,50);sun.castShadow=!mobile;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-90;sun.shadow.camera.right=90;sun.shadow.camera.top=70;sun.shadow.camera.bottom=-70;scene.add(sun);ground();for(let i=0;i<6;i++){machine(i,-40+i*16.1);cellArt(i,-40+i*16.1)}conveyor();office(6,-32,-19,18);officeArt(6,-32,-19,18,10);office(7,-10,-19,18);officeArt(7,-10,-19,18,10);office(8,12,-19,18);officeArt(8,12,-19,18,10);office(9,35,-19,15);officeArt(9,35,-19,15,10);office(10,-25,19,17);officeArt(10,-25,19,17,10);office(11,24,19,19);officeArt(11,24,19,19,10);details();cityDetails();resize();addEventListener('resize',resize);overview();controls.update();let down=null;const ray=new THREE.Raycaster(),v=new THREE.Vector2();canvas.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});canvas.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>9)return;const r=canvas.getBoundingClientRect();v.set((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2);ray.setFromCamera(v,camera);const hits=ray.intersectObjects(clickable,false);if(hits.length)select(hits[0].object.userData.agent)});canvas.addEventListener('pointercancel',()=>down=null);$('#play').onclick=()=>{playing=true;lastCycle=clock.getElapsedTime();$('#status').textContent='DEMO LINE RUNNING · NO LIVE TRADES'};$('#stop').onclick=()=>{playing=false;$('#status').textContent='LINE STOPPED · DEMO ONLY'};$('#reset').onclick=overview;$('#overview').onclick=overview;$('#close').onclick=()=>$('#inspector').classList.add('hidden');loading.style.display='none';function frame(){requestAnimationFrame(frame);const t=clock.getElapsedTime();if(focusTween){const f=focusTween;f.t=Math.min(1,f.t+.035);const k=1-(1-f.t)**3;camera.position.lerpVectors(f.a,f.b,k);controls.target.lerpVectors(f.c,f.d,k);camera.zoom=f.z0+(f.z1-f.z0)*k;camera.updateProjectionMatrix();if(f.t===1)focusTween=null}if(!reduce){for(const fn of animated)fn(t);pallets.forEach((p,i)=>{p.position.x=-48+((i*14+(playing?t*3.1:0))%96)})}controls.update();controls.target.x=THREE.MathUtils.clamp(controls.target.x,-50,50);controls.target.z=THREE.MathUtils.clamp(controls.target.z,-29,29);if(playing&&t-lastCycle>2.5){lastCycle=t;eventCount++;$('#events').textContent=eventCount;$('#status').textContent='DEMO CYCLE '+eventCount+' · STATION '+data[(eventCount-1)%6][0]+' · NO REAL APPROVALS'}renderer.render(scene,camera)}frame()}
+function init(){scene.add(new THREE.HemisphereLight(0xffffff,0x6b7f68,2.3));const sun=new THREE.DirectionalLight(0xfff1cc,2.5);sun.position.set(-40,75,50);sun.castShadow=!mobile;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-90;sun.shadow.camera.right=90;sun.shadow.camera.top=70;sun.shadow.camera.bottom=-70;scene.add(sun);ground();for(let i=0;i<6;i++){machine(i,-40+i*16.1);cellArt(i,-40+i*16.1)}conveyor();office(6,-32,-19,18);officeArt(6,-32,-19,18,10);office(7,-10,-19,18);officeArt(7,-10,-19,18,10);office(8,12,-19,18);officeArt(8,12,-19,18,10);office(9,35,-19,15);officeArt(9,35,-19,15,10);office(10,-25,19,17);officeArt(10,-25,19,17,10);office(11,24,19,19);officeArt(11,24,19,19,10);details();cityDetails();for(let i=0;i<6;i++)detailCell(i,-40+i*16.1);detailCampus();resize();addEventListener('resize',resize);overview();controls.update();let down=null;const ray=new THREE.Raycaster(),v=new THREE.Vector2();canvas.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY]});canvas.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>9)return;const r=canvas.getBoundingClientRect();v.set((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2);ray.setFromCamera(v,camera);const hits=ray.intersectObjects(clickable,false);if(hits.length)select(hits[0].object.userData.agent)});canvas.addEventListener('pointercancel',()=>down=null);$('#play').onclick=()=>{playing=true;lastCycle=clock.getElapsedTime();$('#status').textContent='DEMO LINE RUNNING · NO LIVE TRADES'};$('#stop').onclick=()=>{playing=false;$('#status').textContent='LINE STOPPED · DEMO ONLY'};$('#reset').onclick=overview;$('#overview').onclick=overview;$('#close').onclick=()=>$('#inspector').classList.add('hidden');loading.style.display='none';function frame(){requestAnimationFrame(frame);const t=clock.getElapsedTime();if(focusTween){const f=focusTween;f.t=Math.min(1,f.t+.035);const k=1-(1-f.t)**3;camera.position.lerpVectors(f.a,f.b,k);controls.target.lerpVectors(f.c,f.d,k);camera.zoom=f.z0+(f.z1-f.z0)*k;camera.updateProjectionMatrix();if(f.t===1)focusTween=null}if(!reduce){for(const fn of animated)fn(t);pallets.forEach((p,i)=>{p.position.x=-48+((i*14+(playing?t*3.1:0))%96)})}controls.update();controls.target.x=THREE.MathUtils.clamp(controls.target.x,-50,50);controls.target.z=THREE.MathUtils.clamp(controls.target.z,-29,29);if(playing&&t-lastCycle>2.5){lastCycle=t;eventCount++;$('#events').textContent=eventCount;$('#status').textContent='DEMO CYCLE '+eventCount+' · STATION '+data[(eventCount-1)%6][0]+' · NO REAL APPROVALS'}renderer.render(scene,camera)}frame()}
 try{init()}catch(e){console.error(e);loading.style.display='grid';loading.style.color='#ff655a';loading.textContent='STARTUP ERROR: '+(e?.message||'WebGL unavailable')}
