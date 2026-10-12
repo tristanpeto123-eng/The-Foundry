@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#080e16">
   <title>Scalp City — The Foundry | Line 01</title>
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 
   <!-- Required for Three.js addon modules, including OrbitControls. -->
   <script type="importmap">
@@ -32,7 +32,7 @@
 
     <main>
       <canvas id="world" aria-label="Interactive three dimensional factory"></canvas>
-      <div class="station-key" aria-label="Production line station legend"><span><b>01</b> DATA INTAKE</span><span><b>02</b> BACKTEST</span><span><b>03</b> VISION QA</span><span><b>04</b> SCORING</span><span><b>05</b> RISK GATE</span><span><b>06</b> PAPER DISPATCH</span></div>
+      <nav class="station-key" aria-label="Focus production station"><button data-station="0"><b>01</b> Intake</button><button data-station="1"><b>02</b> Backtest</button><button data-station="2"><b>03</b> Vision QA</button><button data-station="3"><b>04</b> Scoring</button><button data-station="4"><b>05</b> Risk gate</button><button data-station="5"><b>06</b> Dispatch</button></nav>
       <div id="loading" role="status" aria-live="polite">INITIALISING FOUNDRY…</div>
 
       <div class="hud">
@@ -63,7 +63,7 @@
     </footer>
   </div>
 
-  <script type="module" src="app.js?v=7"></script>
+  <script type="module" src="app.js?v=8"></script>
   <script>
     // If the module fails before starting, avoid an endless loading message.
     window.addEventListener('error', function (event) {
