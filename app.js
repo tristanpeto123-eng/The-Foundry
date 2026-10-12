@@ -298,17 +298,18 @@ function loadAuthoredMachinery(){
  const loader=new GLTFLoader();
  const names=['intake','backtester','validator','scorer','risk','dispatch'];
  names.forEach((name,i)=>{
-  loader.load(`assets/${name}.glb?v=8`,gltf=>{
+  loader.load(`assets/${name}.glb?v=9`,gltf=>{
    const assembly=gltf.scene;
    assembly.name=`${data[i][0]}_AUTHORED_MACHINE_ASSEMBLY`;
    assembly.position.set(-40+i*16.1,.18,-2.45);assembly.scale.setScalar(1.18);
    assembly.traverse(obj=>{
     if(obj.isMesh){obj.castShadow=!mobile;obj.receiveShadow=true;obj.userData.agent=i;clickable.push(obj);
-      if(obj.material){obj.material.side=THREE.FrontSide;obj.material.roughness=.48;obj.material.metalness=.26;}
+      if(obj.material){obj.material.side=THREE.FrontSide;obj.material.roughness=.55;obj.material.metalness=.18;}
     }
    });
    scene.add(assembly);
-  },undefined,err=>console.warn('Optional authored assembly unavailable:',name,err));
+   const el=document.querySelector('#asset-status');if(el){el.dataset.loaded=String(Number(el.dataset.loaded||0)+1);el.textContent=`3D ASSETS ${el.dataset.loaded}/6`;}
+  },undefined,err=>{console.warn('Optional authored assembly unavailable:',name,err);const el=document.querySelector('#asset-status');if(el)el.textContent='3D ASSET LOAD ISSUE';});
  });
 }
 
