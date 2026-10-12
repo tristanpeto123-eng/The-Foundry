@@ -1,1 +1,92 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080e16"><title>Scalp City — The Foundry | Evaluation</title><link rel="stylesheet" href="style.css"></head><body><div id="app"><header><div><small>SCALP CITY / LAB</small><strong>THE <em>FOUNDRY</em></strong></div><div class="header-right"><span class="pill">● DEMO / NO LIVE TRADES</span><button id="reset">RESET VIEW</button></div></header><main><canvas id="world" aria-label="Interactive three dimensional factory"></canvas><div id="loading">INITIALISING FOUNDRY…</div><div class="hud"><div class="stat"><small>AGENTS</small><b>12</b></div><div class="stat"><small>SELECTED</small><b id="selected-name">OVERVIEW</b></div><div class="stat"><small>SIMULATED EVENTS</small><b id="events">0</b></div></div><div class="hint">DRAG TO ORBIT · PINCH / SCROLL TO ZOOM · TAP A STATION</div><aside id="inspector" class="hidden"><button id="close" aria-label="Close inspection">✕</button><small>ROBOT INSPECTION / DEMONSTRATION</small><h2 id="agent-title"></h2><p id="agent-role"></p><div class="readout"><small>STATE</small><b id="agent-state"></b></div><div class="readout"><small>ILLUSTRATIVE DECISION</small><b id="agent-decision"></b></div><div class="readout"><small>TELEMETRY</small><b id="agent-metric"></b></div><p class="notice">Visual evaluation only. These agents are not running independent trading services.</p></aside></main><footer><button id="play">▶ PLAY WORKFLOW</button><button id="stop">■ STOP</button><span id="status">READY · ILLUSTRATIVE SCENE</span><button id="overview">⌂ OVERVIEW</button></footer></div><script type="module" src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080e16">
+  <title>Scalp City — The Foundry | Evaluation</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Required for Three.js addon modules, including OrbitControls. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div>
+        <small>SCALP CITY / LAB</small>
+        <strong>THE <em>FOUNDRY</em></strong>
+      </div>
+      <div class="header-right">
+        <span class="pill">● DEMO / NO LIVE TRADES</span>
+        <button id="reset">RESET VIEW</button>
+      </div>
+    </header>
+
+    <main>
+      <canvas id="world" aria-label="Interactive three dimensional factory"></canvas>
+      <div id="loading" role="status" aria-live="polite">INITIALISING FOUNDRY…</div>
+
+      <div class="hud">
+        <div class="stat"><small>AGENTS</small><b>12</b></div>
+        <div class="stat"><small>SELECTED</small><b id="selected-name">OVERVIEW</b></div>
+        <div class="stat"><small>SIMULATED EVENTS</small><b id="events">0</b></div>
+      </div>
+
+      <div class="hint">DRAG TO ORBIT · PINCH / SCROLL TO ZOOM · TAP A STATION</div>
+
+      <aside id="inspector" class="hidden">
+        <button id="close" aria-label="Close inspection">✕</button>
+        <small>ROBOT INSPECTION / DEMONSTRATION</small>
+        <h2 id="agent-title"></h2>
+        <p id="agent-role"></p>
+        <div class="readout"><small>STATE</small><b id="agent-state"></b></div>
+        <div class="readout"><small>ILLUSTRATIVE DECISION</small><b id="agent-decision"></b></div>
+        <div class="readout"><small>TELEMETRY</small><b id="agent-metric"></b></div>
+        <p class="notice">Visual evaluation only. These agents are not running independent trading services.</p>
+      </aside>
+    </main>
+
+    <footer>
+      <button id="play">▶ PLAY WORKFLOW</button>
+      <button id="stop">■ STOP</button>
+      <span id="status">READY · ILLUSTRATIVE SCENE</span>
+      <button id="overview">⌂ OVERVIEW</button>
+    </footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script>
+    // If the module fails before starting, avoid an endless loading message.
+    window.addEventListener('error', function (event) {
+      var loading = document.getElementById('loading');
+      if (loading && getComputedStyle(loading).display !== 'none') {
+        loading.textContent = 'STARTUP ERROR — ' + (event.message || 'CHECK NETWORK AND RELOAD');
+        loading.style.color = '#ff6478';
+      }
+    });
+    window.addEventListener('unhandledrejection', function (event) {
+      var loading = document.getElementById('loading');
+      if (loading && getComputedStyle(loading).display !== 'none') {
+        loading.textContent = 'STARTUP ERROR — CHECK NETWORK AND RELOAD';
+        loading.style.color = '#ff6478';
+      }
+    });
+    setTimeout(function () {
+      var loading = document.getElementById('loading');
+      if (loading && getComputedStyle(loading).display !== 'none' &&
+          loading.textContent.indexOf('INITIALISING') !== -1) {
+        loading.textContent = 'STARTUP TIMED OUT — CHECK NETWORK AND RELOAD';
+        loading.style.color = '#ff6478';
+      }
+    }, 12000);
+  </script>
+</body>
+</html>
