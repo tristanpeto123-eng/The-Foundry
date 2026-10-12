@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-// The Foundry v2: a single Sony-inspired pallet-transfer line with peripheral engineering offices.
+// The Foundry v4: a single Sony-inspired pallet-transfer line with peripheral engineering offices.
 // ALL visual production events are demonstrations; no backend approvals or trading.
 const $=s=>document.querySelector(s),canvas=$('#world'),loading=$('#loading');
 const mobile=matchMedia('(pointer:coarse)').matches,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -64,6 +64,67 @@ function addMachineDetails(g,i){
  beacon(g,4.4,7.4,4.4,i);
  for(let q of [-1,1]){box(g,.15,.12,7,M.yellow,q*5,.12,0)}
 }
+
+// V4: readable industrial assemblies. Each station has identifiable real-world hardware.
+const detailMat={rubber:mat('#171e24'),silver:mat('#b4c2c6',.7,.32),copper:mat('#c77c42',.55),safety:mat('#e7b739'),lens:mat('#143b53',.25,.12),screen:mat('#183b40',.15,.25),paper:mat('#f5f1d8'),black:mat('#24292e')};
+function beamBetween(p,a,b,r,m){const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),d=B.clone().sub(A);const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,d.length(),8),m);o.position.copy(A.add(B).multiplyScalar(.5));o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());p.add(o);return o}
+function bolts(p,x,y,z,wx,wz){for(let dx of [-wx/2,wx/2])for(let dz of [-wz/2,wz/2])cyl(p,.095,.08,detailMat.silver,x+dx,y,z+dz)}
+function machineDetail(g,i){
+ // Safety guarding: legible physical panels with stanchions and hazard markings.
+ for(const x of [-4.6,4.6]){box(g,.12,2.9,.12,M.yellow,x,2.65,-4.15);box(g,.12,2.9,.12,M.yellow,x,2.65,1.75)}
+ for(const z of [-4.15,1.75]){box(g,9.2,.12,.12,M.yellow,0,4.12,z);box(g,9.2,.12,.12,M.yellow,0,1.2,z)}
+ for(let x=-3.6;x<4.1;x+=1.8)box(g,.045,2.2,.045,detailMat.silver,x,2.7,-4.15);
+ // A human-readable operating panel: monitor, hard controls, emergency stop.
+ const c=new THREE.Group();c.position.set(-3.55,0,3.55);g.add(c);
+ box(c,1.65,1.25,.38,detailMat.black,0,2.8,0);box(c,1.34,.88,.07,detailMat.screen,0,2.84,.23);
+ for(let k=0;k<4;k++)box(c,.95-k*.12,.07,.08,[M.green,M.blue,M.yellow,M.orange][k],-.12,3.12-k*.19,.28);
+ box(c,1.65,.18,.9,detailMat.silver,0,1.95,.35);cyl(c,.22,.16,M.red,.5,2.13,.62);
+ for(let k=0;k<3;k++)cyl(c,.085,.09,[M.green,M.yellow,M.blue][k],-.52+k*.28,2.11,.55);
+ for(let j=0;j<4;j++)box(g,.11,.08,1.6,detailMat.black,-3.8+j*.35,.2,3.8);
+ // Cable trunking, compressed air lines, fasteners, feet and service access.
+ box(g,8.5,.26,.42,M.steel,0,.7,-4.55);for(let x=-3.5;x<=3.5;x+=1.75){box(g,.75,.28,.7,detailMat.black,x,.54,-4.1);bolts(g,x,.72,-4.1,.45,.4)}
+ beamBetween(g,[-4.2,1,-3.6],[-4.2,4.8,-3.6],.09,detailMat.copper);
+ beamBetween(g,[-4.2,4.8,-3.6],[3.9,4.8,-3.6],.09,detailMat.copper);
+ // Distinct process tools. Unlike generic boxes these communicate the station's purpose.
+ if(i===0){
+   // Infeed roller table, sensor portal, camera, feed cassettes.
+   for(let x=-2.8;x<=2.8;x+=.7){const r=cyl(g,.19,3.2,detailMat.silver,x,2.35,-1.6);r.rotation.x=Math.PI/2}
+   for(let x of [-2.2,2.2]){box(g,.22,3,.25,M.yellow,x,3.25,1.05);box(g,.8,.42,.5,detailMat.black,x,4.65,1.05)}
+   box(g,5,.22,.3,M.yellow,0,4.85,1.05);cyl(g,.44,.6,detailMat.lens,0,4.4,1.05);
+   for(let x of [-2.5,0,2.5])box(g,.95,1.6,1.4,detailMat.silver,x,3.5,-3.5);
+ } else if(i===1){
+   // Automated test fixture with twin guides, platen, pogo-pin bed and motor.
+   for(let x of [-1.8,1.8]){cyl(g,.14,3.9,detailMat.silver,x,4.05,-2.0);cyl(g,.35,.3,detailMat.black,x,5.95,-2)}
+   box(g,4.6,.45,2.8,detailMat.silver,0,2.25,-2);
+   for(let x=-1.65;x<=1.7;x+=.55)for(let z=-2.8;z<=-1.1;z+=.55)cyl(g,.055,.25,detailMat.copper,x,2.62,z);
+   box(g,1.7,1.2,1.5,M.blue,0,6.1,-2);cyl(g,.4,.6,detailMat.black,0,6.9,-2);
+   for(let x of [-2.5,2.5])box(g,.3,2,.35,M.yellow,x,3,-2);
+ } else if(i===2){
+   // Multi-camera machine-vision inspection, coaxial lights and reject pusher.
+   for(let x of [-1.8,0,1.8]){box(g,.7,.65,.7,detailMat.black,x,5.1,-1.5);cyl(g,.29,.65,detailMat.lens,x,4.65,-1.5);cyl(g,.46,.12,M.green,x,4.27,-1.5)}
+   box(g,5.2,.18,2.8,detailMat.silver,0,2.4,-2);
+   box(g,1.4,.65,1.4,M.orange,3,2.8,-1.8);beamBetween(g,[3,2.8,-1.8],[4.6,2.8,-1.8],.18,detailMat.silver);
+ } else if(i===3){
+   // Servo sorting gantry and three colour-coded grading chutes.
+   box(g,6.5,.5,.65,detailMat.silver,0,5.5,-2.5);
+   for(let x of [-2.1,0,2.1]){box(g,1.8,1.1,2.6,[M.green,M.yellow,M.red][Math.round(x/2.1)+1],x,2.5,-3.25);box(g,1.65,.13,2.5,detailMat.black,x,3.15,-3.25);box(g,.2,1.7,.2,detailMat.silver,x,4.3,-2.5)}
+   box(g,1.4,.55,.7,M.orange,0,5.15,-2.5);
+ } else if(i===4){
+   // Safety PLC enclosure, laser interlock gate and two-hand safety controls.
+   box(g,2.2,2.9,.8,M.yellow,2.6,3.5,-3.5);box(g,1.6,1.3,.09,detailMat.black,2.6,3.8,-3.04);
+   for(let k=0;k<4;k++)box(g,1.25,.13,.1,[M.red,M.green,M.yellow,M.blue][k],2.6,4.22-k*.29,-2.96);
+   for(let x of [-2.2,2.2]){box(g,.25,3.2,.28,M.red,x,3.4,1.2);for(let y=2;y<5;y+=.5)box(g,.12,.11,.11,M.yellow,x,y,1.39)}
+   box(g,4.6,.16,.4,detailMat.black,0,2.1,1.2);
+ } else {
+   // Outfeed packaging: roller conveyor, label printer, dispatch crate.
+   for(let x=-2.5;x<=2.5;x+=.65){const r=cyl(g,.16,2.8,detailMat.silver,x,2.55,-1.5);r.rotation.x=Math.PI/2}
+   box(g,2.1,1.5,1.8,M.orange,0,3.4,-2.6);box(g,1.6,.12,1.4,detailMat.paper,0,4.22,-2.6);
+   box(g,1.7,1.3,.9,detailMat.black,2.6,3.5,-2.9);box(g,1.35,.5,.08,M.green,2.6,3.8,-2.42);
+ }
+ // Readable front-facing station ID at operator height.
+ const id=label(data[i][0]+'  /  '+['INFEED','AUTOMATED TEST','VISION QA','GRADING','RISK GATE','DISPATCH'][i],8.4,.74);id.position.set(0,4.5,4.84);g.add(id);
+}
+
 function tag(mesh,i){mesh.userData.agent=i;clickable.push(mesh);return mesh}
 function robot(p,i,x,z){const g=new THREE.Group();g.position.set(x,0,z);p.add(g);const color=[M.blue,M.orange,M.green,M.yellow,M.red][i%5];cyl(g,.62,.42,M.dark,0,.45,0);box(g,.9,1.2,.75,color,0,1.3,0);box(g,.75,.65,.65,M.white,0,2.23,0);box(g,.58,.18,.09,M.blue,0,2.27,.36);for(const s of [-1,1]){box(g,.2,.9,.24,M.steel,s*.62,1.4,.13);box(g,.27,.4,.3,M.dark,s*.62,.8,.25)}const arm=new THREE.Group();arm.position.set(.58,1.7,0);g.add(arm);box(arm,.24,.95,.24,color,.13,-.43,.15);animated.push(t=>{arm.rotation.x=Math.sin(t*2+i)*.5;g.rotation.y=Math.sin(t*.7+i)*.2});robots.push(g);return g}
 function ground(){box(scene,116,2,66,M.ground,0,-1.4,0);box(scene,106,.3,54,M.floor,0,-.18,0);for(const z of [-23,23]){box(scene,104,.06,4,M.road,0,.04,z);for(let x=-48;x<50;x+=6)box(scene,2,.07,.1,M.yellow,x,.1,z)}for(const z of [-13,13])box(scene,102,.05,.15,M.orange,0,.02,z);for(let x=-48;x<49;x+=8)for(let z of [-30,30]){const t=cyl(scene,1.15,2.4,M.steel,x,1,z);cyl(scene,2.2,.55,M.green,x,2.4,z)}}
@@ -77,7 +138,7 @@ function machine(i,x){const g=new THREE.Group();g.position.set(x,0,0);scene.add(
  if(i===3){for(let k=-2;k<=2;k++)cyl(g,.35,2.1,k%2?M.green:M.yellow,k*1.1,2.1,-2.4)}
  if(i===4){box(g,6,4,.3,M.red,0,3,1.7);box(g,5,.2,.4,M.yellow,0,5.1,1.9)}
  if(i===5){box(g,5,2,3,M.blue,0,2,-2.6);box(g,4.8,.3,2,M.green,0,3.1,-2.6)}
- const screen=box(g,1.4,1.1,.2,M.blue,3.7,2.8,3.2);tag(screen,i);box(g,1.8,1.1,.8,M.dark,3.7,1.8,3.2);robot(g,i,-3.8,3.1);addMachineDetails(g,i);const light=cyl(g,.28,.35,i===4?M.red:M.green,-4.3,7.55,4.5);animated.push(t=>{light.scale.y=.7+.3*Math.sin(t*3+i)});return g}
+ const screen=box(g,1.4,1.1,.2,M.blue,3.7,2.8,3.2);tag(screen,i);box(g,1.8,1.1,.8,M.dark,3.7,1.8,3.2);robot(g,i,-3.8,3.1);addMachineDetails(g,i);machineDetail(g,i);const light=cyl(g,.28,.35,i===4?M.red:M.green,-4.3,7.55,4.5);animated.push(t=>{light.scale.y=.7+.3*Math.sin(t*3+i)});return g}
 function conveyor(){const g=new THREE.Group();scene.add(g);box(g,101,.85,2.9,M.dark,0,.85,0);box(g,101,.12,2.15,M.belt,0,1.36,0);for(const z of [-1.55,1.55])box(g,101,.4,.25,M.orange,0,1.4,z);for(let x=-49;x<50;x+=1.3)box(g,.18,.06,2.05,M.steel,x,1.44,0);for(let x=-48;x<49;x+=5)for(const z of [-1.25,1.25])box(g,.25,1.4,.25,M.steel,x,.25,z);
  for(let i=0;i<7;i++){const p=new THREE.Group();g.add(p);box(p,2,.28,1.7,M.orange,0,1.8,0);box(p,1.35,.7,1.2,M.blue,0,2.32,0);box(p,1.1,.1,1,M.glass,0,2.75,0);pallets.push(p)}
  // One unbroken main conveyor. Rejects move sideways into a buffer, never backwards on the line.
