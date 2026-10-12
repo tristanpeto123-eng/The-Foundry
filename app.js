@@ -23,14 +23,51 @@ const camera=new THREE.OrthographicCamera(-55,55,33,-33,.1,500);camera.position.
 const renderer=new THREE.WebGLRenderer({canvas,antialias:!mobile,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,mobile?1.35:1.8));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.4;renderer.shadowMap.enabled=!mobile;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.085;controls.enableRotate=false;controls.screenSpacePanning=true;controls.target.set(0,1,0);controls.minZoom=.7;controls.maxZoom=3.5;controls.mouseButtons.LEFT=THREE.MOUSE.PAN;controls.touches.ONE=THREE.TOUCH.PAN;controls.touches.TWO=THREE.TOUCH.DOLLY_PAN;
 const mat=(c,m=.1,r=.75)=>new THREE.MeshStandardMaterial({color:c,metalness:m,roughness:r});const M={ground:mat('#88a18a'),floor:mat('#b7c3bb'),concrete:mat('#697b80'),road:mat('#43545c'),wall:mat('#d4d9cd'),steel:mat('#586f79',.55),dark:mat('#243942',.5),blue:mat('#4485a5'),orange:mat('#ed9a3d'),yellow:mat('#f4c65c'),red:mat('#e35e52'),green:mat('#5ac49d'),glass:new THREE.MeshStandardMaterial({color:'#92d5dd',transparent:true,opacity:.6,depthWrite:false,roughness:.14}),belt:mat('#202f34'),white:mat('#edf0df'),roof:mat('#558096')};
-const clickable=[],animated=[],pallets=[],robots=[];let selected=-1,playing=false,eventCount=0,lastCycle=0,focusTween=null;const clock=new THREE.Clock();
+const clickable=[],animated=[],pallets=[],robots=[];const overlays=[];let selected=-1,playing=false,eventCount=0,lastCycle=0,focusTween=null;const clock=new THREE.Clock();
 function box(p,w,h,d,m,x=0,y=0,z=0){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;p.add(o);return o}
 function cyl(p,r,h,m,x=0,y=0,z=0){const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,12),m);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o}
 function label(str,w=9,h=.95){const c=document.createElement('canvas');c.width=1024;c.height=130;const q=c.getContext('2d');q.fillStyle='#203e4d';q.fillRect(0,0,1024,130);q.fillStyle='#f4bc60';q.fillRect(0,0,15,130);q.fillStyle='#ffffff';q.font='bold 57px system-ui';q.fillText(str,32,85,970);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}))}
+function floorMark(p,text,x,z,w=5){const t=label(text,w,.55);t.rotation.x=-Math.PI/2;t.position.set(x,.11,z);p.add(t)}
+function placard(p,title,subtitle,x,y,z,w=9){const g=new THREE.Group();g.position.set(x,y,z);p.add(g);box(g,w,1.7,.18,M.dark,0,0,0);const a=label(title,w-.3,.72);a.position.set(0,.36,.14);g.add(a);const b=label(subtitle,w-.3,.58);b.position.set(0,-.42,.14);g.add(b);return g}
+function beacon(p,x,y,z,i){const stem=cyl(p,.15,.65,M.dark,x,y,z);const c=[M.green,M.yellow,M.red][i%3];for(let k=0;k<3;k++)cyl(p,.29,.29,k===i%3?c:M.steel,x,y+.5+k*.34,z)}
+function addMachineDetails(g,i){
+ // Distinct silhouettes identify machine function without needing to read tiny labels.
+ if(i===0){ // feed preparation, optical intake and scanning tunnel
+  box(g,4.8,2.8,3.8,M.blue,0,3.1,-2.8);box(g,3.8,1.7,.15,M.glass,0,3.1,-.8);
+  for(let j=-1;j<=1;j++){cyl(g,.32,2.6,M.steel,j*1.25,4.1,-2.8);box(g,.65,.32,2,M.orange,j*1.25,5.4,-2.8)}
+  placard(g,'01 / INTAKE','FEED + SCAN',0,5.2,-.5,7.6);
+ }else if(i===1){ // automated test enclosure and travelling Z-axis head
+  for(let q of [-2.6,2.6])box(g,.28,4.8,.28,M.yellow,q,4,-1.7);
+  box(g,6,.4,.5,M.yellow,0,6.35,-1.7);
+  const head=box(g,2.1,1.35,1.8,M.orange,0,4.6,-1.8);animated.push(t=>{head.position.y=4.6+(playing?.65*Math.sin(t*1.8):0)});
+  box(g,4.3,.2,3.1,M.dark,0,2.05,-2);placard(g,'02 / ATE','BACKTEST FIXTURE',0,5.2,-.5,8.2);
+ }else if(i===2){ // camera inspection portal
+  for(let q of [-2.5,2.5])box(g,.4,4.5,.4,M.blue,q,3.8,.1);
+  box(g,5.4,.45,.5,M.blue,0,6,.1);cyl(g,.85,.65,M.dark,0,5.5,.1);
+  cyl(g,.38,.7,M.glass,0,4.9,.1);for(let q of [-2,2])box(g,.3,2.4,.3,M.yellow,q,3.4,.1);
+  placard(g,'03 / VISION QA','INSPECT + VALIDATE',0,5.2,-.5,8.7);
+ }else if(i===3){ // sorting and grading chutes
+  for(let q=-1;q<=1;q++){box(g,1.55,2.4,2.2,[M.green,M.yellow,M.red][q+1],q*2,2.6,-2.6);box(g,1.5,.18,3.1,M.steel,q*2,3.8,-1.4)}
+  placard(g,'04 / GRADING','SCORE + BIN',0,5.2,-.5,8.2);
+ }else if(i===4){ // red safety interlock gate
+  for(let q of [-2.6,2.6])box(g,.55,5.2,.55,M.red,q,3.6,.6);
+  box(g,6,.7,.7,M.red,0,6.3,.6);box(g,5.5,2.8,.2,M.glass,0,3.5,.6);
+  for(let q=-2;q<=2;q++)box(g,.32,.7,.25,M.yellow,q,5.5,.8);
+  placard(g,'05 / SAFETY','RISK INTERLOCK',0,5.2,-.5,8.5);
+ }else{ // packing / dispatch roller outfeed
+  box(g,6,2.5,3,M.blue,0,2.8,-2.8);for(let q=-2;q<=2;q++)cyl(g,.3,.7,M.orange,q*1.1,4.25,-2.4);
+  box(g,5.2,.4,2,M.green,0,4.8,-2.6);placard(g,'06 / DISPATCH','PAPER SIMULATION',0,5.2,-.5,8.6);
+ }
+ // Every cell gets an operator console, physical safety zone and tower light.
+ box(g,2.1,.2,1.2,M.yellow,-3.8,.13,3.1);floorMark(g,'OPERATOR',-3.8,4.1,3.8);
+ box(g,1.4,1.15,.4,M.dark,-2.15,2.1,3.8);box(g,1.15,.75,.08,M.green,-2.15,2.25,4.06);
+ beacon(g,4.4,7.4,4.4,i);
+ for(let q of [-1,1]){box(g,.15,.12,7,M.yellow,q*5,.12,0)}
+}
 function tag(mesh,i){mesh.userData.agent=i;clickable.push(mesh);return mesh}
 function robot(p,i,x,z){const g=new THREE.Group();g.position.set(x,0,z);p.add(g);const color=[M.blue,M.orange,M.green,M.yellow,M.red][i%5];cyl(g,.62,.42,M.dark,0,.45,0);box(g,.9,1.2,.75,color,0,1.3,0);box(g,.75,.65,.65,M.white,0,2.23,0);box(g,.58,.18,.09,M.blue,0,2.27,.36);for(const s of [-1,1]){box(g,.2,.9,.24,M.steel,s*.62,1.4,.13);box(g,.27,.4,.3,M.dark,s*.62,.8,.25)}const arm=new THREE.Group();arm.position.set(.58,1.7,0);g.add(arm);box(arm,.24,.95,.24,color,.13,-.43,.15);animated.push(t=>{arm.rotation.x=Math.sin(t*2+i)*.5;g.rotation.y=Math.sin(t*.7+i)*.2});robots.push(g);return g}
 function ground(){box(scene,116,2,66,M.ground,0,-1.4,0);box(scene,106,.3,54,M.floor,0,-.18,0);for(const z of [-23,23]){box(scene,104,.06,4,M.road,0,.04,z);for(let x=-48;x<50;x+=6)box(scene,2,.07,.1,M.yellow,x,.1,z)}for(const z of [-13,13])box(scene,102,.05,.15,M.orange,0,.02,z);for(let x=-48;x<49;x+=8)for(let z of [-30,30]){const t=cyl(scene,1.15,2.4,M.steel,x,1,z);cyl(scene,2.2,.55,M.green,x,2.4,z)}}
-function office(i,x,z,w=15,d=10){const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);const h=i===9?11:7.2;tag(box(g,w,.45,d,M.concrete,0,.2,0),i);box(g,w,h,.35,M.wall,0,h/2,-d/2);for(const s of [-1,1])box(g,.35,h,d,M.wall,s*w/2,h/2,0);box(g,w,.4,d*.3,M.roof,0,h+.15,-d*.36);box(g,w,.5,.3,M.blue,0,h-.25,d/2);for(let k=-2;k<=2;k++){box(g,1.6,3.5,.15,M.glass,k*2.55,3.3,-d/2+.23);box(g,1.6,3.2,.15,M.glass,k*2.55,3.3,d/2)}const s=label(data[i][0]+'  '+data[i][1],w-.8);s.position.set(0,h-1.1,d/2+.3);g.add(s);for(let k=-1;k<=1;k++){box(g,2.8,.85,1.6,M.steel,k*3,1,-.5);box(g,1.6,.75,.1,M.blue,k*3,1.8,.3)}robot(g,i,w/2-2.2,2);return g}
+function office(i,x,z,w=15,d=10){const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);const h=i===9?11:7.2;tag(box(g,w,.45,d,M.concrete,0,.2,0),i);box(g,w,h,.35,M.wall,0,h/2,-d/2);for(const s of [-1,1])box(g,.35,h,d,M.wall,s*w/2,h/2,0);box(g,w,.4,d*.3,M.roof,0,h+.15,-d*.36);box(g,w,.5,.3,M.blue,0,h-.25,d/2);for(let k=-2;k<=2;k++){box(g,1.6,3.5,.15,M.glass,k*2.55,3.3,-d/2+.23);box(g,1.6,3.2,.15,M.glass,k*2.55,3.3,d/2)}const s=label(data[i][0]+'  '+data[i][1],w-.8);s.position.set(0,h-1.1,d/2+.3);g.add(s);for(let k=-1;k<=1;k++){box(g,2.8,.85,1.6,M.steel,k*3,1,-.5);box(g,1.6,.75,.1,M.blue,k*3,1.8,.3)}robot(g,i,w/2-2.2,2);placard(g,'ENGINEERING',data[i][1],0,h+1.15,d/2+.2,Math.min(w-1,13));return g}
 function machine(i,x){const g=new THREE.Group();g.position.set(x,0,0);scene.add(g);tag(box(g,11,.55,13,M.concrete,0,.3,0),i);for(const s of [-1,1]){box(g,.35,7,.35,M.steel,s*5,3.7,-4.7);box(g,.35,7,.35,M.steel,s*5,3.7,4.7)}box(g,10.5,.45,1.2,M.blue,0,7.1,-4.7);box(g,10.5,.4,.4,M.orange,0,6.8,4.7);const sign=label(data[i][0]+'  '+data[i][1],10,.9);sign.position.set(0,5.7,4.95);g.add(sign);
  // Each machine bridges the same continuous conveyor at z=0.
  const main=box(g,7,3.5,3.7,i===4?M.red:M.steel,0,2.3,-2.7);tag(main,i);box(g,5.6,1.1,.2,M.glass,0,3.4,-.72);
@@ -40,7 +77,7 @@ function machine(i,x){const g=new THREE.Group();g.position.set(x,0,0);scene.add(
  if(i===3){for(let k=-2;k<=2;k++)cyl(g,.35,2.1,k%2?M.green:M.yellow,k*1.1,2.1,-2.4)}
  if(i===4){box(g,6,4,.3,M.red,0,3,1.7);box(g,5,.2,.4,M.yellow,0,5.1,1.9)}
  if(i===5){box(g,5,2,3,M.blue,0,2,-2.6);box(g,4.8,.3,2,M.green,0,3.1,-2.6)}
- const screen=box(g,1.4,1.1,.2,M.blue,3.7,2.8,3.2);tag(screen,i);box(g,1.8,1.1,.8,M.dark,3.7,1.8,3.2);robot(g,i,-3.8,3.1);const light=cyl(g,.28,.35,i===4?M.red:M.green,-4.3,7.55,4.5);animated.push(t=>{light.scale.y=.7+.3*Math.sin(t*3+i)});return g}
+ const screen=box(g,1.4,1.1,.2,M.blue,3.7,2.8,3.2);tag(screen,i);box(g,1.8,1.1,.8,M.dark,3.7,1.8,3.2);robot(g,i,-3.8,3.1);addMachineDetails(g,i);const light=cyl(g,.28,.35,i===4?M.red:M.green,-4.3,7.55,4.5);animated.push(t=>{light.scale.y=.7+.3*Math.sin(t*3+i)});return g}
 function conveyor(){const g=new THREE.Group();scene.add(g);box(g,101,.85,2.9,M.dark,0,.85,0);box(g,101,.12,2.15,M.belt,0,1.36,0);for(const z of [-1.55,1.55])box(g,101,.4,.25,M.orange,0,1.4,z);for(let x=-49;x<50;x+=1.3)box(g,.18,.06,2.05,M.steel,x,1.44,0);for(let x=-48;x<49;x+=5)for(const z of [-1.25,1.25])box(g,.25,1.4,.25,M.steel,x,.25,z);
  for(let i=0;i<7;i++){const p=new THREE.Group();g.add(p);box(p,2,.28,1.7,M.orange,0,1.8,0);box(p,1.35,.7,1.2,M.blue,0,2.32,0);box(p,1.1,.1,1,M.glass,0,2.75,0);pallets.push(p)}
  // One unbroken main conveyor. Rejects move sideways into a buffer, never backwards on the line.
