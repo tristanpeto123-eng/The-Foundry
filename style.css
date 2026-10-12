@@ -15,3 +15,18 @@
 
 #asset-status{position:absolute;z-index:5;right:12px;top:10px;padding:5px 8px;background:#102d3bcc;color:#b8e8d9;border:1px solid #497c84;border-radius:5px;font:700 9px system-ui;letter-spacing:.7px;pointer-events:none}
 @media(max-width:700px){#asset-status{top:67px;right:8px;font-size:8px}}
+
+/* v10: restrained industrial visual system and higher-contrast readable controls */
+:root{color:#edf1f2;background:#10171d}
+header{background:linear-gradient(110deg,#18232c,#202e39);border-bottom-color:#8e6644}
+header em{color:#e8b77e}
+.pill{background:#30332f;color:#f2c790;border-color:#98754e}
+button{background:#253746;border-color:#506879}
+button:hover{background:#344e60}
+.stat{background:#162631e8;border-color:#4b6674;border-left-color:#d9a263}
+.station-key button{background:#1b2e3ce8;border-color:#607b8b;color:#f2f6f7}
+.station-key button b{color:#f0bf82}
+.station-key button.active{background:#364451;border-color:#e3ad73}
+footer{background:#192631;border-top-color:#8e6644}
+#play{background:#965e32;border-color:#ca955f}
+#asset-status{background:#203b41e8;color:#d0e8e0;border-color:#54777a}
